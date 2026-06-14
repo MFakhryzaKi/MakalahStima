@@ -40,18 +40,12 @@ void verifyFile (ifstream &fileInput) {
         getline (fileInput, s);
         v = parse (s);
 
-        cout << "Isi s = " << s << endl;
-        cout << "V size = " << v.size() << endl;
         if (v.size() != 2) {
             throw ConfigException ("Input baris pertama harus 2 angka yang menunjukkan tinggi dan panjang papan!", 1);
-            // printError ("input baris pertama tidak sama dengan 2");
-            // return {false, 1};
         }
 
         if (!isInteger(v[0]) || !isInteger(v[1])) {
             throw ConfigException ("Input baris pertama harus 2 angka yang menunjukkan tinggi dan panjang papan!", 1);
-            // printError ("input baris pertama bukan integer");
-            // return {false, 1};
         }
 
         Baris = stoi (v[0]);
@@ -60,8 +54,6 @@ void verifyFile (ifstream &fileInput) {
 
         if (Baris > 1000 || Kolom > 1000) {
             throw ConfigException ("Ukuran papan tidak boleh melebihi 1000!", 1);
-            // printError ("ukuran papan tidak boleh melebihi 1000");
-            // return {false, 1};
         }
 
         if (!fileInput.eof()) {
@@ -195,7 +187,8 @@ void readAndVerifyFile () {
 
 }
 
-void printPapan () {
+void printPapan (int waktu) {
+    cout << "------------ Papan Permainan ------------" << endl;
     for (int baris = Baris - 1; baris >= 0; baris--) {
         int awal = baris * Kolom + 1;
 
@@ -214,34 +207,92 @@ void printPapan () {
         cout << endl;
     }
 
-    cout << "Tangga: " << endl;
+    cout << "List Tangga: " << endl;
     for (auto tangga : Tangga) {
         cout << tangga.first << " -> " << tangga.second << endl;
     }
 
-    cout << "Ular: " << endl;
+    cout << "List Ular: " << endl;
     for (auto ular : Ular) {
         cout << ular.first << " -> " << ular.second << endl;
     }
+
+    cout << "Waktu komputasi: " << waktu << " microseconds" << endl;
+    cout << "-------------------------------------------" << endl;
 }
 
 void printSatuPetak (int idx) {
+    cout << "===========================================" << endl << endl;
     cout << "               Petak " << idx << "               " << endl;
     cout << "Langkah Minimal    : " << petak[idx].minStep << endl;
-    cout << "Urutan Dadu        : " << petak[idx].urutanDadu << endl;
-    cout << "Rute               : " << petak[idx].rute << endl;
+    cout << "Urutan Dadu        :" << petak[idx].urutanDadu << endl;
+    cout << "Rute               :" << petak[idx].rute << endl << endl;
+    cout << "===========================================" << endl;
 }
 
 void printDetail () {
-    cout << "-------------------------------------------" << endl;
+    cout << "===========================================" << endl << endl;
+    // cout << "-------------------------------------------" << endl;
     for (int i = 1; i <= UkuranPetak; i++) {
         printSatuPetak (i);
-        cout << "-------------------------------------------" << endl;
+        // cout << "-------------------------------------------" << endl;
     }
+    cout << endl << "===========================================" << endl;
+
 }
 
 void printSingkat () {
+    cout << "===========================================" << endl << endl;
     for (int i = 1; i <= UkuranPetak; i++) {
         cout << "Petak[" << i << "] : " << petak[i].minStep << endl;
+    }
+    cout << endl << "===========================================" << endl;
+
+}
+
+string to_lower_case (string s) {
+    string res = "";
+    for (char c : s) {
+        if (c >= 'A' && c <= 'Z') {
+            res += c - 'A' + 'a';
+        }
+        else {
+            res += c;
+        }
+    }
+    return res;
+}
+
+void tampilkanPanel () {
+    while (true) {
+        cout << "List perintah : " << endl;
+        cout << "1. Melihat detail satu petak (cmd: 1-" << UkuranPetak << ")" << endl;
+        cout << "2. Melihat summary dari semua petak (cmd: summary)" << endl;
+        cout << "3. Melihat detail dari semua petak (cmd: detail)" << endl;
+        cout << "4. Keluar dari program (cmd: quit/exit)" << endl;
+
+        string s;
+        cout << ">> ";
+        getline(cin, s);
+        s = to_lower_case (s);
+        if (isInteger (s)) {
+            int temp = stoi(s);
+            if (temp >= 1 && temp <= UkuranPetak) {
+                printSatuPetak (temp);
+            }
+            else {
+                cout << "Angka harus berada di antara 1-" << UkuranPetak << "!" << endl;
+                continue;
+            }
+        }
+        else if (s == "summary") {
+            printSingkat ();
+        }
+        else if (s == "detail") {
+            printDetail ();
+        }
+        else if (s == "quit" || s == "exit") {
+            break;
+        }
     }
 }

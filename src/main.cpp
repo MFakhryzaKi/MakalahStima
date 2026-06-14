@@ -3,7 +3,13 @@
 
 int main () {
     readAndVerifyFile();
-    printPapan();
+    
+    auto startTime = chrono::high_resolution_clock::now();
     startSolve ();
-    printDetail ();
+    auto endTime = chrono::high_resolution_clock::now();
+    auto duration_us = chrono::duration_cast<chrono::microseconds> (endTime - startTime);
+    
+    printPapan(duration_us.count());
+    tampilkanPanel ();
+    // printDetail ();
 }

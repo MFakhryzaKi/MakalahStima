@@ -1,6 +1,8 @@
 #include "solver.hpp"
 
-PetakInfo minimal (PetakInfo a, PetakInfo b) {
+bool visiting[1000000];
+
+PetakInfo minimal(PetakInfo a, PetakInfo b) {
     if (a.minStep < b.minStep) {
         return a;
     }
@@ -9,53 +11,66 @@ PetakInfo minimal (PetakInfo a, PetakInfo b) {
     }
 }
 
-PetakInfo solve (int idxPetak, int stepCount, string curDaduPath, string curRute) {
-    // cout << " " << idxPetak << endl;
+PetakInfo solve(int idxPetak) {
     if (idxPetak > UkuranPetak) {
-        idxPetak = 2*UkuranPetak - idxPetak;
+        return PetakInfo(NILAI_MAXIMAL, "", "");
     }
 
     if (idxPetak == UkuranPetak) {
-        return {stepCount, curDaduPath, curRute};
+        return PetakInfo(0, "", " " + to_string(idxPetak));
     }
 
     if (petak[idxPetak].minStep != NILAI_MAXIMAL) {
-        return PetakInfo (stepCount + petak[idxPetak].minStep, curDaduPath + petak[idxPetak].urutanDadu, curRute + petak[idxPetak].rute);
-        // return petak[idxPetak];
+        return petak[idxPetak];
     }
+
+    if (visiting[idxPetak]) {
+        return PetakInfo();
+    }
+
+    visiting[idxPetak] = true;
 
     int petakSekarang = idxPetak;
 
-    if (Tangga.count (idxPetak)) {
+    if (Tangga.count(idxPetak)) {
         petakSekarang = Tangga[idxPetak];
     }
-    else if (Ular.count (idxPetak)) {
+    else if (Ular.count(idxPetak)) {
         petakSekarang = Ular[idxPetak];
     }
 
-    PetakInfo best = PetakInfo ();
-    for (int dadu = 1; dadu <= 6; dadu++) {
-        string daduPath = curDaduPath + " " + to_string (dadu);
-        string ruteBaru = petakSekarang == idxPetak ? curRute + " (" + to_string(idxPetak) + "=>" + to_string(petakSekarang) + ")" : curRute + " " + to_string(petakSekarang);
-        best = minimal(best, solve (petakSekarang + dadu, stepCount + 1, daduPath, ruteBaru));
-        // petak[idxPetak] = minimal (best, petak[idxPetak]);
+    string prefixRute = petakSekarang != idxPetak
+        ? " (" + to_string(idxPetak) + "=>" + to_string(petakSekarang) + ")"
+        : " " + to_string(petakSekarang);
+
+    PetakInfo best = PetakInfo();
+
+    for (int dadu = 6; dadu >= 1; dadu--) {
+        PetakInfo hasil = solve(petakSekarang + dadu);
+        if (hasil.minStep == NILAI_MAXIMAL) continue;
+
+        PetakInfo kandidat(
+            1 + hasil.minStep,
+            " " + to_string(dadu) + hasil.urutanDadu,
+            prefixRute + hasil.rute
+        );
+        best = minimal(best, kandidat);
     }
 
+    visiting[idxPetak] = false;
     return petak[idxPetak] = best;
 }
 
-void startSolve () {
-    // initialize petak
+void startSolve() {
     for (int i = 1; i <= UkuranPetak; i++) {
-        petak[i] = PetakInfo ();
+        petak[i] = PetakInfo();
     }
-    cout << "masuk sini" << endl;
 
-    // solve satu-satu dari akhir sampe awal
     for (int i = UkuranPetak; i >= 1; i--) {
-        cout << i << endl;
-        petak[i] = solve (i, 0, "", "");
-        // printSatuPetak (i);
+        if (Ular.count(i)) {
+            continue;
+        }
+        petak[i] = solve(i);
     }
-    cout << "kedua" << endl;
+
 }
